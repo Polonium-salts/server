@@ -42,7 +42,15 @@ public class WebSocketController {
         User receiver = userService.findById(chatMessage.getReceiverId()).orElse(null);
         
         if (sender != null && receiver != null) {
-            Message message = messageService.sendMessage(sender, receiver, chatMessage.getContent());
+            // Create and save message
+            Message message = new Message();
+            message.setSenderId(sender.getId());  // 使用User的ID而不是User对象
+            message.setReceiverId(receiver.getId());  // 使用User的ID而不是User对象
+            message.setContent(chatMessage.getContent());
+            message.setCreatedAt(LocalDateTime.now());
+            message.setRead(false);
+            
+            message = messageService.saveMessage(message);
             response.put("messageId", message.getId());
         }
         

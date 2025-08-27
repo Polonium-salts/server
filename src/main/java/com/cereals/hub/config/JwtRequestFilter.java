@@ -22,7 +22,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private UserService userService;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private JwtTokenUtil jwtTokenUtil;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -37,7 +37,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
             jwtToken = requestTokenHeader.substring(7);
             try {
-                username = jwtUtil.extractUsername(jwtToken);
+                username = jwtTokenUtil.getUsernameFromToken(jwtToken);
             } catch (Exception e) {
                 logger.error("Unable to get JWT Token", e);
             }
@@ -50,7 +50,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             // For simplicity, we're just checking if user exists
 
             // If token is valid configure Spring Security to manually set authentication
-            if (jwtUtil.validateToken(jwtToken, username)) {
+            if (jwtTokenUtil.validateToken(jwtToken, username)) {
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = 
                     new UsernamePasswordAuthenticationToken(username, null, null);
                 usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

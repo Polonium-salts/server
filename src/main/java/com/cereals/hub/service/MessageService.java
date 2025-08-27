@@ -40,4 +40,8 @@ public class MessageService {
     public List<Message> getUserReceivedMessages(Long userId) {
         return messageRepository.findByReceiverIdOrderByCreatedAtAsc(userId);
     }
+    
+    public Message saveMessage(Message message) {
+        return messageRepository.save(message);
+    }
 }

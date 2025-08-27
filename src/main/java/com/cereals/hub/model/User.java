@@ -118,4 +118,9 @@ public class User {
     public void setOnline(boolean online) {
         isOnline = online;
     }
+    
+    // UserStatus enum
+    public enum UserStatus {
+        ONLINE, OFFLINE, AWAY, BUSY
+    }
 }

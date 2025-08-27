@@ -188,75 +188,75 @@
                                             </tr>
                                             <tr>
                                                 <td>2023-06-15 14:25</td>
-                                <td>李四</td>
-                                <td>发送消息</td>
-                                <td>向群组"技术讨论"发送消息</td>
-                            </tr>
-                            <tr>
-                                <td>2023-06-15 14:20</td>
-                                <td>王五</td>
-                                <td>创建群组</td>
-                                <td>创建了群组"产品讨论"</td>
-                            </tr>
-                            <tr>
-                                <td>2023-06-15 14:15</td>
-                                <td>赵六</td>
-                                <td>注册</td>
-                                <td>新用户注册</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                                <td>李四</td>
+                                                <td>发送消息</td>
+                                                <td>向群组"技术讨论"发送消息</td>
+                                            </tr>
+                                            <tr>
+                                                <td>2023-06-15 14:20</td>
+                                                <td>王五</td>
+                                                <td>创建群组</td>
+                                                <td>创建了群组"产品讨论"</td>
+                                            </tr>
+                                            <tr>
+                                                <td>2023-06-15 14:15</td>
+                                                <td>赵六</td>
+                                                <td>注册</td>
+                                                <td>新用户注册</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </main>
         </div>
     </div>
-</div>
-</main>
-</div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // User activity chart
-    const userActivityCtx = document.getElementById('userActivityChart').getContext('2d');
-    const userActivityChart = new Chart(userActivityCtx, {
-        type: 'line',
-        data: {
-            labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
-            datasets: [{
-                label: '活跃用户',
-                data: [120, 190, 130, 180, 210, 170, 150],
-                borderColor: 'rgb(75, 192, 192)',
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    });
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // User activity chart
+        const userActivityCtx = document.getElementById('userActivityChart').getContext('2d');
+        const userActivityChart = new Chart(userActivityCtx, {
+            type: 'line',
+            data: {
+                labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                datasets: [{
+                    label: '活跃用户',
+                    data: [120, 190, 130, 180, 210, 170, 150],
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
 
-    // Message stats chart
-    const messageStatsCtx = document.getElementById('messageStatsChart').getContext('2d');
-    const messageStatsChart = new Chart(messageStatsCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['私聊', '群聊', '系统通知'],
-            datasets: [{
-                data: [300, 500, 100],
-                backgroundColor: [
-                    'rgb(255, 99, 132)',
-                    'rgb(54, 162, 235)',
-                    'rgb(255, 205, 86)'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    });
-</script>
+        // Message stats chart
+        const messageStatsCtx = document.getElementById('messageStatsChart').getContext('2d');
+        const messageStatsChart = new Chart(messageStatsCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['私聊', '群聊', '系统通知'],
+                datasets: [{
+                    data: [300, 500, 100],
+                    backgroundColor: [
+                        'rgb(255, 99, 132)',
+                        'rgb(54, 162, 235)',
+                        'rgb(255, 205, 86)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    </script>
 </body>
 </html>
