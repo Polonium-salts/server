@@ -18,7 +18,7 @@ services:
 
   # CerealsHub后端服务
   backend:
-    build: .
+    image: openjdk:17-jdk-slim
     container_name: cereals_hub_backend
     ports:
       - "8080:8080"
@@ -30,6 +30,16 @@ services:
       - db
     networks:
       - cereals_hub_network
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: >
+      bash -c "
+        apt-get update &&
+        apt-get install -y maven &&
+        mvn clean package &&
+        java -jar target/*.jar
+      "
 
 volumes:
   postgres_data:
