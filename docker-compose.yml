@@ -1,49 +1,42 @@
 version: '3.8'
 
 services:
-  # PostgreSQL数据库
   db:
-    image: postgres:15
-    container_name: cereals_hub_db
+    image: mysql:8.0
+    container_name: chat_app_db
+    restart: always
     environment:
-      POSTGRES_DB: cereals_hub
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      MYSQL_DATABASE: chat_app
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_USER: chatuser
+      MYSQL_PASSWORD: chatpassword
     ports:
-      - "5432:5432"
+      - "3306:3306"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - cereals_hub_network
+      - db_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
 
-  # CerealsHub后端服务
-  backend:
-    image: openjdk:17-jdk-slim
-    container_name: cereals_hub_backend
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chat_app_server
+    restart: always
     ports:
-      - "8080:8080"
+      - "3000:3000"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/cereals_hub
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
+      - DB_HOST=db
+      - DB_USER=chatuser
+      - DB_PASSWORD=chatpassword
+      - DB_NAME=chat_app
+      - DB_PORT=3306
+      - JWT_SECRET=your_jwt_secret_key_here
+      - NODE_ENV=production
     depends_on:
       - db
-    networks:
-      - cereals_hub_network
-    working_dir: /app
     volumes:
       - .:/app
-    command: >
-      bash -c "
-        apt-get update &&
-        apt-get install -y maven &&
-        mvn clean package &&
-        java -jar target/*.jar
-      "
+      - /app/node_modules
 
 volumes:
-  postgres_data:
-
-networks:
-  cereals_hub_network:
-    driver: bridge
+  db_data:
