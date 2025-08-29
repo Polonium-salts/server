@@ -2,6 +2,29 @@ import { NextRequest, NextResponse } from 'next/server';
 import { registerUser, loginUser } from '../../../lib/auth';
 import pool from '../../../lib/db';
 
+// 获取所有用户（无需认证）
+export async function GET(request: NextRequest) {
+  try {
+    // 获取所有用户
+    const [rows] = await pool.execute(
+      'SELECT id, username, email, created_at FROM users ORDER BY created_at DESC'
+    );
+    
+    const users = rows as any[];
+    
+    return NextResponse.json({
+      message: 'Users retrieved successfully',
+      data: users
+    });
+  } catch (error) {
+    console.error('Error retrieving users:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
 // 用户注册
 export async function POST(request: NextRequest) {
   try {

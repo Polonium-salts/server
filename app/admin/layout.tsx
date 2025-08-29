@@ -35,6 +35,7 @@ export default function AdminLayout({
     { name: 'Dashboard', href: '/admin' },
     { name: 'Users', href: '/admin/users' },
     { name: 'Database', href: '/admin/database' },
+    { name: 'API 文档', href: '/api-doc' },
     { name: 'Settings', href: '/admin/settings' },
   ];
 

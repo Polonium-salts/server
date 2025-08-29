@@ -1,0 +1,192 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+
+interface Message {
+  id: number;
+  sender_id: number;
+  receiver_id: number;
+  content: string;
+  created_at: string;
+}
+
+interface User {
+  id: number;
+  username: string;
+}
+
+export default function MessagesPage() {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchMessages();
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const token = localStorage.getItem('admin_token');
+      if (!token) return;
+      
+      const response = await fetch('/api/admin/users', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(data.data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+
+  const fetchMessages = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      // 从localStorage获取token
+      const token = localStorage.getItem('admin_token');
+      
+      if (!token) {
+        setError('未登录');
+        setLoading(false);
+        return;
+      }
+      
+      // 调用实际的API端点获取消息列表
+      const response = await fetch('/api/admin/messages', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('获取消息列表失败');
+      }
+      
+      const data = await response.json();
+      setMessages(data.data || []);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      setError('获取消息列表失败');
+      setLoading(false);
+    }
+  };
+
+  const getUserName = (userId: number) => {
+    const user = users.find(u => u.id === userId);
+    return user ? user.username : `用户${userId}`;
+  };
+
+  return (
+    <div>
+      <div className="pb-5 border-b border-gray-200">
+        <h3 className="text-lg leading-6 font-medium text-gray-900">
+          消息管理
+        </h3>
+      </div>
+
+      {error && (
+        <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <span className="block sm:inline">{error}</span>
+        </div>
+      )}
+
+      <div className="mt-6 flex flex-col">
+        <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+          <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+            <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      ID
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      发送者
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      接收者
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      内容
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      发送时间
+                    </th>
+                    <th scope="col" className="relative px-6 py-3">
+                      <span className="sr-only">操作</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {loading ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
+                        加载中...
+                      </td>
+                    </tr>
+                  ) : messages.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
+                        暂无消息数据
+                      </td>
+                    </tr>
+                  ) : (
+                    messages.map((message) => (
+                      <tr key={message.id}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {message.id}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {getUserName(message.sender_id)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {getUserName(message.receiver_id)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-xs truncate">
+                          {message.content}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(message.created_at).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <a href="#" className="text-indigo-600 hover:text-indigo-900">
+                            删除
+                          </a>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

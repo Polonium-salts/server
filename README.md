@@ -56,7 +56,30 @@ The database consists of the following tables:
 
 ## Deployment
 
+### Deploying with Docker
+
 The application can be deployed using Docker. See the Dockerfile and docker-compose.yml for details.
+
+### Deploying to Vercel
+
+This application can be deployed to Vercel with the following steps:
+
+1. Push your code to a Git repository (GitHub, GitLab, or Bitbucket)
+2. Sign up for a Vercel account at [vercel.com](https://vercel.com)
+3. Create a new project and import your repository
+4. Configure the environment variables in the Vercel dashboard:
+   - `DB_HOST` - Your database host
+   - `DB_USER` - Your database username
+   - `DB_PASSWORD` - Your database password
+   - `DB_NAME` - Your database name
+   - `DB_PORT` - Your database port (usually 3306)
+   - `JWT_SECRET` - Your JWT secret key
+   - `JWT_EXPIRES_IN` - JWT expiration time (e.g., 24h)
+5. Deploy the project
+
+The vercel.json configuration file is already included in this project for seamless deployment.
+
+For detailed Vercel deployment instructions, see [docs/vercel-deployment.md](docs/vercel-deployment.md).
 
 ## Contributing
 

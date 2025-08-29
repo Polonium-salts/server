@@ -9,7 +9,8 @@
     "lint": "eslint",
     "init": "node init-app.js",
     "init-admin": "node scripts/init-admin.js",
-    "show-admin": "node scripts/show-admin.js"
+    "show-admin": "node scripts/show-admin.js",
+    "vercel-build": "next build --turbopack"
   },
   "dependencies": {
     "react": "19.1.0",

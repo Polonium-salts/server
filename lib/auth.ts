@@ -3,7 +3,9 @@ import jwt from 'jsonwebtoken';
 import pool from './db';
 import { User } from '../models/User';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
+function getJwtSecret() {
+  return process.env.JWT_SECRET || 'default_secret';
+}
 
 export async function hashPassword(password: string): Promise<string> {
   const saltRounds = 10;
@@ -17,14 +19,14 @@ export async function verifyPassword(password: string, hashedPassword: string): 
 export function generateToken(user: User): string {
   return jwt.sign(
     { id: user.id, username: user.username, email: user.email },
-    JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+    getJwtSecret(),
+    { expiresIn: process.env.JWT_EXPIRES_IN || '24h' } as any
   );
 }
 
 export async function verifyToken(token: string): Promise<User | null> {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as User;
+    const decoded = jwt.verify(token, getJwtSecret()) as User;
     // 验证用户是否仍然存在
     const [rows] = await pool.execute('SELECT * FROM users WHERE id = ?', [decoded.id]);
     const users = rows as User[];

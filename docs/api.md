@@ -66,7 +66,32 @@ PUT /api/users
 }
 ```
 
-### 获取用户信息
+### 获取所有用户
+
+**请求**
+```
+GET /api/users
+```
+
+**认证**
+无需认证
+
+**响应**
+```json
+{
+  "message": "Users retrieved successfully",
+  "data": [
+    {
+      "id": "number",
+      "username": "string",
+      "email": "string",
+      "created_at": "date"
+    }
+  ]
+}
+```
+
+### 获取特定用户信息
 
 **请求**
 ```
