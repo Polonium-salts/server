@@ -81,6 +81,14 @@ The vercel.json configuration file is already included in this project for seaml
 
 For detailed Vercel deployment instructions, see [docs/vercel-deployment.md](docs/vercel-deployment.md).
 
+### Vercel Deployment Troubleshooting
+
+If you encounter "Unexpected token '<'" errors, this typically means that static JavaScript files are being served as HTML. This can happen due to routing issues. To fix this:
+
+1. Make sure your vercel.json file is properly configured without overly broad routing rules
+2. Ensure your Next.js configuration doesn't have conflicting basePath or assetPrefix settings
+3. Check that your API routes don't conflict with static file paths
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.

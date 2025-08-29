@@ -62,6 +62,14 @@ NODE_ENV=production
 
 ## 故障排除
 
+### "Unexpected token '<'" 错误
+
+这是最常见的部署问题，通常表示 JavaScript 文件被错误地返回为 HTML 内容。解决方法：
+
+1. 检查您的 [vercel.json](file://d:\Users\17932\Documents\GitHub\server\vercel.json) 配置文件，确保路由规则不会拦截静态资源请求
+2. 确保您的 Next.js 配置中没有设置冲突的 basePath 或 assetPrefix
+3. 检查 API 路由是否与静态资源路径冲突
+
 ### 数据库连接问题
 
 如果遇到数据库连接问题：
@@ -81,3 +89,13 @@ NODE_ENV=production
 1. 环境变量来源不同：本地使用 `.env` 文件，Vercel 使用项目设置中的环境变量
 2. 数据库连接可能需要不同的配置
 3. 日志输出在 Vercel 上会受到限制
+
+## Vercel 特定配置
+
+本项目包含以下 Vercel 特定配置文件：
+
+1. **[vercel.json](file://d:\Users\17932\Documents\GitHub\server\vercel.json)** - Vercel 部署配置
+2. **[next.config.ts](file://d:\Users\17932\Documents\GitHub\server\next.config.ts)** - Next.js 配置，包含 Vercel 优化设置
+3. **[lib/db.ts](file://d:\Users\17932\Documents\GitHub\server\lib\db.ts)** - 数据库连接配置，支持 Vercel 环境
+
+这些配置确保了应用程序在 Vercel 上的正确运行。

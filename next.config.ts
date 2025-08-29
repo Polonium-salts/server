@@ -18,6 +18,19 @@ const nextConfig: NextConfig = {
   
   // 支持在Vercel上使用serverless函数
   serverExternalPackages: ['mysql2'],
+  
+  // 针对Vercel的优化配置
+  poweredByHeader: false,
+  compress: true,
+  
+  // 静态资源优化
+  images: {
+    unoptimized: true, // Vercel会处理图片优化
+  },
+  
+  // 针对Vercel的路径配置
+  basePath: '',
+  assetPrefix: '',
 };
 
 export default nextConfig;
