@@ -17,9 +17,7 @@ const nextConfig: NextConfig = {
   },
   
   // 支持在Vercel上使用serverless函数
-  experimental: {
-    serverComponentsExternalPackages: ['mysql2'],
-  },
+  serverExternalPackages: ['mysql2'],
 };
 
 export default nextConfig;

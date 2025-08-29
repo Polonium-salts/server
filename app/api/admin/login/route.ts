@@ -2,8 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from '../../../../lib/db';
+import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
+
+interface Admin {
+  id: number;
+  username: string;
+  email: string;
+  password: string;
+}
 
 // 管理员登录
 export async function POST(request: NextRequest) {
@@ -20,9 +28,9 @@ export async function POST(request: NextRequest) {
     }
     
     // 查找管理员
-    let rows: any[];
+    let rows: RowDataPacket[];
     try {
-      [rows] = await pool.execute(
+      [rows] = await pool.execute<RowDataPacket[]>(
         'SELECT * FROM admins WHERE username = ?',
         [username]
       );
@@ -37,7 +45,7 @@ export async function POST(request: NextRequest) {
         
         // 重新尝试查询
         try {
-          [rows] = await pool.execute(
+          [rows] = await pool.execute<RowDataPacket[]>(
             'SELECT * FROM admins WHERE username = ?',
             [username]
           );
@@ -56,7 +64,7 @@ export async function POST(request: NextRequest) {
       }
     }
     
-    const admins = rows as any[];
+    const admins = rows as Admin[];
     
     if (admins.length === 0) {
       return NextResponse.json(
@@ -79,7 +87,7 @@ export async function POST(request: NextRequest) {
     const token = jwt.sign(
       { id: admin.id, username: admin.username, email: admin.email },
       JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '24h' } as jwt.SignOptions
     );
     
     return NextResponse.json({

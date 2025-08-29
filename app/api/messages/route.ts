@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '../../../lib/db';
 import { authMiddleware } from '../../../middleware/auth';
+import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 
 // 发送消息
 export async function POST(request: NextRequest) {
@@ -22,12 +23,12 @@ export async function POST(request: NextRequest) {
     }
     
     // 检查接收者是否存在
-    const [receiverRows] = await pool.execute(
+    const [receiverRows] = await pool.execute<RowDataPacket[]>(
       'SELECT id FROM users WHERE id = ?',
       [receiver_id]
     );
     
-    if ((receiverRows as any[]).length === 0) {
+    if (receiverRows.length === 0) {
       return NextResponse.json(
         { error: 'Receiver not found' },
         { status: 404 }
@@ -35,20 +36,20 @@ export async function POST(request: NextRequest) {
     }
     
     // 插入消息
-    const [result] = await pool.execute(
+    const [result] = await pool.execute<ResultSetHeader>(
       'INSERT INTO messages (sender_id, receiver_id, content) VALUES (?, ?, ?)',
       [user.id, receiver_id, content]
     );
     
-    const messageId = (result as any).insertId;
+    const messageId = result.insertId;
     
     // 获取插入的消息
-    const [messageRows] = await pool.execute(
+    const [messageRows] = await pool.execute<RowDataPacket[]>(
       'SELECT * FROM messages WHERE id = ?',
       [messageId]
     );
     
-    const messages = messageRows as any[];
+    const messages = messageRows;
     
     return NextResponse.json({
       message: 'Message sent successfully',
@@ -76,10 +77,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('user_id');
     
-    let messages;
+    let messages: RowDataPacket[];
     if (userId) {
       // 获取与特定用户的消息
-      const [rows] = await pool.execute(
+      const [rows] = await pool.execute<RowDataPacket[]>(
         `SELECT * FROM messages 
          WHERE (sender_id = ? AND receiver_id = ?) 
          OR (sender_id = ? AND receiver_id = ?)
@@ -89,7 +90,7 @@ export async function GET(request: NextRequest) {
       messages = rows;
     } else {
       // 获取所有消息
-      const [rows] = await pool.execute(
+      const [rows] = await pool.execute<RowDataPacket[]>(
         `SELECT * FROM messages 
          WHERE sender_id = ? OR receiver_id = ?
          ORDER BY created_at DESC`,

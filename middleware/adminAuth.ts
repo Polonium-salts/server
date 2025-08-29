@@ -1,5 +1,12 @@
 import { NextRequest, NextFetchEvent } from 'next/server';
 import pool from '../lib/db';
+import { RowDataPacket } from 'mysql2/promise';
+
+interface Admin {
+  id: number;
+  username: string;
+  email: string;
+}
 
 export async function adminAuthMiddleware(request: NextRequest, event: NextFetchEvent) {
   // 获取认证token
@@ -34,12 +41,12 @@ export async function adminAuthMiddleware(request: NextRequest, event: NextFetch
   try {
     // 在实际应用中，您应该使用JWT来验证token
     // 这里我们假设token就是用户名
-    const [rows] = await pool.execute(
+    const [rows] = await pool.execute<RowDataPacket[]>(
       'SELECT id, username, email FROM admins WHERE username = ?',
       [token]
     );
     
-    const admins = rows as any[];
+    const admins = rows as Admin[];
     
     if (admins.length === 0) {
       // token无效，重定向到登录页面

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '../../../../lib/db';
 import { adminAuthMiddleware } from '../../../../middleware/adminAuth';
+import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 
 // 获取数据库连接信息
 export async function GET(request: NextRequest) {
@@ -17,20 +18,26 @@ export async function GET(request: NextRequest) {
       
       try {
         // 获取数据库统计信息
-        const [userCount] = await connection.execute('SELECT COUNT(*) as count FROM users');
-        const [relationCount] = await connection.execute('SELECT COUNT(*) as count FROM user_relations');
+        const [userCount] = await connection.execute<RowDataPacket[]>(
+          'SELECT COUNT(*) as count FROM users'
+        );
+        const [relationCount] = await connection.execute<RowDataPacket[]>(
+          'SELECT COUNT(*) as count FROM user_relations'
+        );
         
         // 获取管理员数量
-        const [adminCount] = await connection.execute('SELECT COUNT(*) as count FROM admins');
+        const [adminCount] = await connection.execute<RowDataPacket[]>(
+          'SELECT COUNT(*) as count FROM admins'
+        );
         
         const dbStats = {
-          users: (userCount as any[])[0].count,
-          relations: (relationCount as any[])[0].count,
-          admins: (adminCount as any[])[0].count,
+          users: (userCount[0] as any).count,
+          relations: (relationCount[0] as any).count,
+          admins: (adminCount[0] as any).count,
         };
         
         // 获取数据库表结构信息
-        const [tables] = await connection.execute(
+        const [tables] = await connection.execute<RowDataPacket[]>(
           `SELECT 
             table_name,
             table_rows,
@@ -44,8 +51,10 @@ export async function GET(request: NextRequest) {
         );
         
         // 获取数据库版本
-        const [versionResult] = await connection.execute('SELECT VERSION() as version');
-        const version = (versionResult as any[])[0].version;
+        const [versionResult] = await connection.execute<RowDataPacket[]>(
+          'SELECT VERSION() as version'
+        );
+        const version = (versionResult[0] as any).version;
         
         connection.release();
         

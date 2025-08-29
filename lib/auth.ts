@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from './db';
 import { User } from '../models/User';
+import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 
 function getJwtSecret() {
   return process.env.JWT_SECRET || 'default_secret';
@@ -20,7 +21,7 @@ export function generateToken(user: User): string {
   return jwt.sign(
     { id: user.id, username: user.username, email: user.email },
     getJwtSecret(),
-    { expiresIn: process.env.JWT_EXPIRES_IN || '24h' } as any
+    { expiresIn: process.env.JWT_EXPIRES_IN || '24h' } as jwt.SignOptions
   );
 }
 
@@ -28,7 +29,10 @@ export async function verifyToken(token: string): Promise<User | null> {
   try {
     const decoded = jwt.verify(token, getJwtSecret()) as User;
     // 验证用户是否仍然存在
-    const [rows] = await pool.execute('SELECT * FROM users WHERE id = ?', [decoded.id]);
+    const [rows] = await pool.execute<RowDataPacket[]>(
+      'SELECT * FROM users WHERE id = ?', 
+      [decoded.id]
+    );
     const users = rows as User[];
     return users.length > 0 ? users[0] : null;
   } catch (error) {
@@ -39,13 +43,16 @@ export async function verifyToken(token: string): Promise<User | null> {
 export async function registerUser(username: string, email: string, password: string): Promise<User | null> {
   try {
     const hashedPassword = await hashPassword(password);
-    const [result] = await pool.execute(
+    const [result] = await pool.execute<ResultSetHeader>(
       'INSERT INTO users (username, email, password) VALUES (?, ?, ?)',
       [username, email, hashedPassword]
     );
     
-    const userId = (result as any).insertId;
-    const [rows] = await pool.execute('SELECT * FROM users WHERE id = ?', [userId]);
+    const userId = result.insertId;
+    const [rows] = await pool.execute<RowDataPacket[]>(
+      'SELECT * FROM users WHERE id = ?', 
+      [userId]
+    );
     const users = rows as User[];
     return users[0];
   } catch (error) {
@@ -56,7 +63,10 @@ export async function registerUser(username: string, email: string, password: st
 
 export async function loginUser(email: string, password: string): Promise<{ user: User; token: string } | null> {
   try {
-    const [rows] = await pool.execute('SELECT * FROM users WHERE email = ?', [email]);
+    const [rows] = await pool.execute<RowDataPacket[]>(
+      'SELECT * FROM users WHERE email = ?', 
+      [email]
+    );
     const users = rows as User[];
     
     if (users.length === 0) {

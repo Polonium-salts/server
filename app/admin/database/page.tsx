@@ -1,19 +1,38 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
+// 定义数据库信息的类型
+interface DbStats {
+  users: number;
+  relations: number;
+  admins: number;
+}
+
+interface DbTable {
+  table_name: string;
+  table_rows: number;
+  data_length: number;
+  index_length: number;
+  create_time: string;
+}
+
+interface DbInfo {
+  connectionStatus: string;
+  database: string;
+  version: string;
+  stats: DbStats;
+  tables: DbTable[];
+}
+
 export default function DatabaseInfo() {
-  const [dbInfo, setDbInfo] = useState<any>(null);
+  const [dbInfo, setDbInfo] = useState<DbInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const router = useRouter();
 
-  useEffect(() => {
-    fetchDbInfo();
-  }, []);
-
-  const fetchDbInfo = async () => {
+  const fetchDbInfo = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -46,7 +65,11 @@ export default function DatabaseInfo() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
+
+  useEffect(() => {
+    fetchDbInfo();
+  }, [fetchDbInfo]);
 
   const handleRefresh = () => {
     fetchDbInfo();
@@ -114,11 +137,11 @@ export default function DatabaseInfo() {
               </dt>
               <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                  dbInfo.connectionStatus === 'connected' 
+                  dbInfo?.connectionStatus === 'connected' 
                     ? 'bg-green-100 text-green-800' 
                     : 'bg-red-100 text-red-800'
                 }`}>
-                  {dbInfo.connectionStatus === 'connected' ? '已连接' : '未连接'}
+                  {dbInfo?.connectionStatus === 'connected' ? '已连接' : '未连接'}
                 </span>
               </dd>
             </div>
@@ -127,7 +150,7 @@ export default function DatabaseInfo() {
                 数据库名称
               </dt>
               <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                {dbInfo.database}
+                {dbInfo?.database}
               </dd>
             </div>
             <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -135,7 +158,7 @@ export default function DatabaseInfo() {
                 数据库版本
               </dt>
               <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                {dbInfo.version}
+                {dbInfo?.version}
               </dd>
             </div>
           </dl>
@@ -156,7 +179,7 @@ export default function DatabaseInfo() {
                 用户数量
               </dt>
               <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                {dbInfo.stats.users}
+                {dbInfo?.stats.users}
               </dd>
             </div>
             <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -164,7 +187,7 @@ export default function DatabaseInfo() {
                 关系数量
               </dt>
               <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                {dbInfo.stats.relations}
+                {dbInfo?.stats.relations}
               </dd>
             </div>
             <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
@@ -172,7 +195,7 @@ export default function DatabaseInfo() {
                 管理员数量
               </dt>
               <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                {dbInfo.stats.admins}
+                {dbInfo?.stats.admins}
               </dd>
             </div>
           </dl>
@@ -209,7 +232,7 @@ export default function DatabaseInfo() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {dbInfo.tables.map((table: any, index: number) => (
+                {dbInfo?.tables.map((table, index) => (
                   <tr key={table.table_name} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       {table.table_name}
@@ -250,7 +273,7 @@ export default function DatabaseInfo() {
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">用户数</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">{dbInfo.stats.users}</div>
+                      <div className="text-2xl font-semibold text-gray-900">{dbInfo?.stats.users}</div>
                     </dd>
                   </dl>
                 </div>
@@ -270,7 +293,7 @@ export default function DatabaseInfo() {
                   <dl>
                     <dt className="text-sm font-medium text-gray-500 truncate">用户关系数</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">{dbInfo.stats.relations}</div>
+                      <div className="text-2xl font-semibold text-gray-900">{dbInfo?.stats.relations}</div>
                     </dd>
                   </dl>
                 </div>

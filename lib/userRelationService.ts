@@ -1,5 +1,6 @@
 import pool from './db';
 import { UserRelation, UserRelationCreationParams, RelationStatus } from '../models/UserRelation';
+import { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
 
 export class UserRelationService {
   // 创建用户关系
@@ -15,12 +16,12 @@ export class UserRelationService {
         return null; // 关系已存在
       }
       
-      const [result] = await pool.execute(
+      const [result] = await pool.execute<ResultSetHeader>(
         'INSERT INTO user_relations (user_id, related_user_id, status) VALUES (?, ?, ?)',
         [params.user_id, params.related_user_id, params.status]
       );
       
-      const relationId = (result as any).insertId;
+      const relationId = result.insertId;
       const relation = await this.getRelationById(relationId);
       return relation;
     } catch (error) {
@@ -32,7 +33,7 @@ export class UserRelationService {
   // 根据ID获取关系
   static async getRelationById(id: number): Promise<UserRelation | null> {
     try {
-      const [rows] = await pool.execute(
+      const [rows] = await pool.execute<RowDataPacket[]>(
         'SELECT * FROM user_relations WHERE id = ?',
         [id]
       );
@@ -48,7 +49,7 @@ export class UserRelationService {
   // 获取两个用户之间的关系
   static async getRelationBetweenUsers(userId1: number, userId2: number): Promise<UserRelation | null> {
     try {
-      const [rows] = await pool.execute(
+      const [rows] = await pool.execute<RowDataPacket[]>(
         'SELECT * FROM user_relations WHERE (user_id = ? AND related_user_id = ?) OR (user_id = ? AND related_user_id = ?)',
         [userId1, userId2, userId2, userId1]
       );
@@ -62,9 +63,9 @@ export class UserRelationService {
   }
 
   // 获取用户的好友列表
-  static async getUserFriends(userId: number): Promise<any[]> {
+  static async getUserFriends(userId: number): Promise<UserRelation[]> {
     try {
-      const [rows] = await pool.execute(
+      const [rows] = await pool.execute<RowDataPacket[]>(
         `SELECT ur.*, u.username as friend_username, u.email as friend_email
          FROM user_relations ur
          JOIN users u ON ur.related_user_id = u.id
@@ -72,7 +73,7 @@ export class UserRelationService {
         [userId]
       );
       
-      return rows as any[];
+      return rows as UserRelation[];
     } catch (error) {
       console.error('Error getting user friends:', error);
       return [];
@@ -83,7 +84,7 @@ export class UserRelationService {
   static async updateRelationStatus(relationId: number, status: RelationStatus, userId: number): Promise<boolean> {
     try {
       // 检查用户是否有权限更新此关系
-      const [rows] = await pool.execute(
+      const [rows] = await pool.execute<RowDataPacket[]>(
         'SELECT * FROM user_relations WHERE id = ? AND related_user_id = ?',
         [relationId, userId]
       );
@@ -95,14 +96,14 @@ export class UserRelationService {
       }
       
       // 更新关系状态
-      await pool.execute(
+      await pool.execute<ResultSetHeader>(
         'UPDATE user_relations SET status = ? WHERE id = ?',
         [status, relationId]
       );
       
       // 如果是接受好友请求，创建反向关系
       if (status === 'accepted') {
-        await pool.execute(
+        await pool.execute<ResultSetHeader>(
           'INSERT INTO user_relations (user_id, related_user_id, status) VALUES (?, ?, ?)',
           [userId, relations[0].user_id, 'accepted']
         );
@@ -119,7 +120,7 @@ export class UserRelationService {
   static async deleteRelation(relationId: number, userId: number): Promise<boolean> {
     try {
       // 检查用户是否有权限删除此关系
-      const [rows] = await pool.execute(
+      const [rows] = await pool.execute<RowDataPacket[]>(
         'SELECT * FROM user_relations WHERE id = ? AND (user_id = ? OR related_user_id = ?)',
         [relationId, userId, userId]
       );
@@ -131,13 +132,13 @@ export class UserRelationService {
       }
       
       // 删除关系
-      await pool.execute(
+      await pool.execute<ResultSetHeader>(
         'DELETE FROM user_relations WHERE id = ?',
         [relationId]
       );
       
       // 删除反向关系
-      await pool.execute(
+      await pool.execute<ResultSetHeader>(
         'DELETE FROM user_relations WHERE user_id = ? AND related_user_id = ?',
         [relations[0].related_user_id, relations[0].user_id]
       );

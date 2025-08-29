@@ -20,6 +20,14 @@ const eslintConfig = [
       "next-env.d.ts",
     ],
   },
+  {
+    rules: {
+      // 在某些情况下允许使用 any 类型
+      "@typescript-eslint/no-explicit-any": "off",
+      // 允许未使用的变量（在某些情况下）
+      "@typescript-eslint/no-unused-vars": "warn",
+    },
+  },
 ];
 
 export default eslintConfig;

@@ -3,12 +3,17 @@
 
 import { Message } from '../models/Message';
 
+// 定义客户端类型
+interface Client {
+  send: (data: string) => void;
+}
+
 // 存储连接的客户端（在实际应用中，您可能需要使用 Redis 或其他存储方式）
-const connectedClients = new Map<number, any>();
+const connectedClients = new Map<number, Client>();
 
 export class RealtimeMessaging {
   // 注册客户端连接
-  static registerClient(userId: number, client: any) {
+  static registerClient(userId: number, client: Client) {
     connectedClients.set(userId, client);
     console.log(`Client registered for user ${userId}`);
   }
